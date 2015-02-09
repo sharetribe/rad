@@ -24,6 +24,7 @@ Docker
 
 The Docker image is based on official Clojure Docker image: https://registry.hub.docker.com/_/clojure/
 
+```bash
 docker build -t my-clojure-app .
 docker run -it -p 3000:3000 -e "USERVOICE_API_KEY=api-key-here" -e "USERVOICE_API_SECRET=api-secret-here" --rm --name my-running-app my-clojure-app
-
+```
