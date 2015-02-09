@@ -1,0 +1,49 @@
+.level-problem {
+    background-color: red;
+    color: white;
+}
+
+.level-warn {
+    background-color: yellow;
+}
+
+.level-good {
+    background-color: green;
+    color: white;
+}
+
+.measurement-status-container{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 5%;
+}
+
+.measurement-status-num {
+    font-size: 200px;
+}
+
+.measurement-status-description {
+    font-size: 80px;
+}
+
+.not-available-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    text-align: center;
+}
