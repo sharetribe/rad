@@ -9,6 +9,7 @@
                  [org.clojure/tools.logging "0.3.1"]
                  [environ "1.0.0"]
                  [overtone/at-at "1.2.0"]
+                 [clj-time "0.9.0"]
                  [com.uservoice/uservoice-java "0.0.2"]]
   :plugins [[lein-ring "0.8.13"]]
   :ring {:handler rad.handler/app}

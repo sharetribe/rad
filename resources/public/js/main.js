@@ -44,4 +44,4 @@
   };
 
   setInterval(changePage, interval);
-})(1000);
+})(10000);
