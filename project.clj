@@ -14,7 +14,7 @@
                  [clj-time "0.9.0"]
                  [com.uservoice/uservoice-java "0.0.2"]]
   :plugins [[lein-ring "0.8.13"]]
-  :uberjar-name "clojure-getting-started-standalone.jar"
+  :uberjar-name "rad.jar"
   :ring {:handler rad.handler/app :init rad.handler/start-processing}
   :profiles
   {:uberjar {:aot :all}

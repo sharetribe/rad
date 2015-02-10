@@ -30,10 +30,10 @@
   (let [
     data (:uservoice-tickets @data)
   ]
-    (log/info (str (first data)))
-    (count (filter (fn [ticket]
-      (not (contains? ticket "assignee"))
-    ) data))
+    (when data
+      (count (filter (fn [ticket]
+        (not (contains? ticket "assignee"))
+      ) data)))
   )
 )
 
@@ -58,11 +58,11 @@
                                    false)
                                   (not (contains? ticket "assignee"))
                                   )) ticket-data)
-        longest-wait   (if (some? waiting-answer)
+        longest-wait   (when (seq waiting-answer)
                          (reduce (fn [a b]
                                    (if (> (wait-time a now) (wait-time b now)) a b)
                                    ) waiting-answer)
-                         {})
+                       )
     ]
     longest-wait
   )
@@ -71,7 +71,10 @@
 (def page-specs [
   {:id :open-support-tickets
    :data open-unassigned-uv-tickets
-   :values (fn [data] {
+   :values (fn [data]
+     (if (nil? data)
+       {:template :not-available}
+     {
      :template :measurement-status
      :number data
      :description "Open unassigned support tickets"
@@ -79,11 +82,13 @@
          (< data 5) 0
          (< data 10) 1
          :else 2)
-   })
+   }))
   },
   {:id :open-response-time
    :data open-response-time
    :values (fn [data]
+     (if (nil? data)
+       {:template :not-available}
      (let [
        minutes (wait-time data (t/now))
        formatted (str (quot minutes 60) "h " (rem minutes 60) "min")]
@@ -97,7 +102,7 @@
            (< minutes 1440) 1
            :else 2)
        })
-     )
+     ))
   }
 ])
 
@@ -142,6 +147,7 @@
   (route/not-found "Not Found"))
 
 (defn start-processing []
+  (log/info "Start processing data sources")
   (process-data-sources data-source-specs)
 )
 
