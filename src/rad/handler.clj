@@ -7,9 +7,8 @@
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [clj-time.format :as f]
             [clj-time.core :as t]
-            [clojure.data.json :as json]))
-
-(use 'overtone.at-at)
+            [clojure.data.json :as json]
+            [overtone.at-at :refer [every mk-pool]]))
 
 (def my-pool (mk-pool))
 
@@ -20,13 +19,12 @@
 (def data (atom {}))
 
 (defn process-data-sources [specs]
-  (map (fn [spec]
-    (every (:update-every spec) (fn []
-      (log/info "Updating from data source" (:id spec))
-      (swap! data (fn [x] (assoc x (:id spec) ((:fetch spec)))))
-    ) my-pool))
-  specs)
-)
+  (doseq [spec specs]
+         (every (:update-every spec)
+                (fn []
+                  (log/info "Updating from data source" (:id spec))
+                  (swap! data (fn [x] (assoc x (:id spec) ((:fetch spec)))))
+                  ) my-pool)))
 
 (defn open-unassigned-uv-tickets []
   (let [
@@ -50,20 +48,21 @@
 )
 
 (defn open-response-time []
-  (let [
-    now (t/now)
-    ticket-data (:uservoice-tickets @data)
-    waiting-answer (filter (fn [ticket]
-      (and
-        (=
-          (get
-            (first (get ticket "messages")) "is_admin_response")
-          false)
-        (not (contains? ticket "assignee"))
-        )) ticket-data)
-    longest-wait (reduce (fn [a b]
-      (if (> (wait-time a now) (wait-time b now)) a b)
-    ) waiting-answer)
+  (let [now            (t/now)
+        ticket-data    (:uservoice-tickets @data)
+        waiting-answer (filter (fn [ticket]
+                                 (and
+                                  (=
+                                   (get
+                                    (first (get ticket "messages")) "is_admin_response")
+                                   false)
+                                  (not (contains? ticket "assignee"))
+                                  )) ticket-data)
+        longest-wait   (if (some? waiting-answer)
+                         (reduce (fn [a b]
+                                   (if (> (wait-time a now) (wait-time b now)) a b)
+                                   ) waiting-answer)
+                         {})
     ]
     longest-wait
   )
