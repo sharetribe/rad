@@ -18,12 +18,9 @@
     left: 0;
     right: 0;
     bottom: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
     padding: 5%;
+    padding-top: 25%;
+    text-align: center;
 }
 
 .measurement-status-num {
@@ -40,10 +37,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    padding-top: 25%;
     font-size: 80px;
     text-align: center;
 }
