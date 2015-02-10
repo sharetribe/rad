@@ -17,23 +17,20 @@
   uv-tickets/datasource-spec
 ])
 
+(def data (atom {}))
+
 (defn process-data-sources [specs]
   (map (fn [spec]
-    (let [current (atom {})]
-      (every (:update-every spec) (fn []
-        (log/info "Updating from data source" (:id spec))
-        (swap! current (fn [x] ((:fetch spec))))
-      ) my-pool)
-      [(:id spec) (fn [] @current)]
-    )
-  ) specs)
+    (every (:update-every spec) (fn []
+      (log/info "Updating from data source" (:id spec))
+      (swap! data (fn [x] (assoc x (:id spec) ((:fetch spec)))))
+    ) my-pool))
+  specs)
 )
-
-(def data-sources (into {} (process-data-sources data-source-specs)))
 
 (defn open-unassigned-uv-tickets []
   (let [
-    data ((:uservoice-tickets data-sources))
+    data (:uservoice-tickets @data)
   ]
     (log/info (str (first data)))
     (count (filter (fn [ticket]
@@ -55,7 +52,7 @@
 (defn open-response-time []
   (let [
     now (t/now)
-    data ((:uservoice-tickets data-sources))
+    ticket-data (:uservoice-tickets @data)
     waiting-answer (filter (fn [ticket]
       (and
         (=
@@ -63,7 +60,7 @@
             (first (get ticket "messages")) "is_admin_response")
           false)
         (not (contains? ticket "assignee"))
-        )) data)
+        )) ticket-data)
     longest-wait (reduce (fn [a b]
       (if (> (wait-time a now) (wait-time b now)) a b)
     ) waiting-answer)
@@ -144,6 +141,10 @@
   (GET "/api" [] (json/write-str (select-page pages)))
   (route/resources "/")
   (route/not-found "Not Found"))
+
+(defn start-processing []
+  (process-data-sources data-source-specs)
+)
 
 (def app
   (wrap-defaults app-routes site-defaults))

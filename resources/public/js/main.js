@@ -43,5 +43,6 @@
       });
   };
 
+  changePage();
   setInterval(changePage, interval);
 })(10000);
