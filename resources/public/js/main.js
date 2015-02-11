@@ -15,9 +15,9 @@
   };
 
   var levelClass = function(level) {
-    if (level == 2) {
+    if (level == "problem") {
       return "level-problem";
-    } else if (level == 1) {
+    } else if (level == "warn") {
       return "level-warn";
     } else {
       return "level-good";
