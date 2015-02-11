@@ -12,11 +12,13 @@
                  [environ "1.0.0"]
                  [overtone/at-at "1.2.0"]
                  [clj-time "0.9.0"]
-                 [com.uservoice/uservoice-java "0.0.2"]]
+                 [com.uservoice/uservoice-java "0.0.2"]
+                 [com.stuartsierra/component "0.2.2"]]
   :plugins [[lein-ring "0.8.13"]]
   :uberjar-name "rad.jar"
   :ring {:handler rad.handler/app :init rad.handler/start-processing}
   :profiles
   {:uberjar {:aot :all}
    :dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                        [ring-mock "0.1.5"]]}})
+                        [ring-mock "0.1.5"]
+                        [org.clojure/tools.namespace "0.2.9"]]}})
