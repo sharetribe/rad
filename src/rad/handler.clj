@@ -73,22 +73,26 @@
    :data open-unassigned-uv-tickets
    :values (fn [data]
      (if (nil? data)
-       {:template :not-available}
+       {:template :not-available
+        :level :none
+       }
      {
      :template :measurement-status
      :number data
      :description "Open unassigned support tickets"
      :level (cond
-         (< data 5) 0
-         (< data 10) 1
-         :else 2)
+         (< data 5) :good
+         (< data 10) :warn
+         :else :problem)
    }))
   },
   {:id :open-response-time
    :data open-response-time
    :values (fn [data]
      (if (nil? data)
-       {:template :not-available}
+       {:template :not-available
+        :level :none
+       }
      (let [
        minutes (wait-time data (t/now))
        formatted (str (quot minutes 60) "h " (rem minutes 60) "min")]
@@ -98,9 +102,9 @@
        :description "Longest wait time for open unassinged ticket"
        :level
          (cond
-           (< minutes 720) 0
-           (< minutes 1440) 1
-           :else 2)
+           (< minutes 720) :good
+           (< minutes 1440) :warn
+           :else :problem)
        })
      ))
   }
@@ -121,11 +125,18 @@
   )
 )
 
-(def next-page (next-page-iterator (count page-specs)))
+(defn cycle-num [seed num interval]
+  (quot (mod seed (* interval num)) interval))
 
-(defn select-page [pages]
-  (nth (pages) (next-page))
-)
+(defn cycle-pages [seed pages]
+  (nth pages (cycle-num seed (count pages) 10000)))
+
+(defn select-page [seed pages]
+  (let [group (group-by :level pages)]
+    (cond
+      (not (empty? (:problem group))) (cycle-pages seed (:problem group))
+      (not (empty? (:warn group))) (cycle-pages seed (:warn group))
+      :else (cycle-pages seed pages))))
 
 (defn process-page [page]
   (let [
@@ -138,11 +149,13 @@
       :description (:description page)
       :level level
     }
-  )
-)
+  ))
+
+(defn ms-from-epoch []
+  (.getTime (new java.util.Date)))
 
 (defroutes app-routes
-  (GET "/api" [] (json/write-str (select-page pages)))
+  (GET "/api" [] (json/write-str (select-page (ms-from-epoch) (pages))))
   (route/resources "/")
   (route/not-found "Not Found"))
 
